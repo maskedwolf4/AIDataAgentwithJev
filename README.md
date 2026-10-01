@@ -254,7 +254,9 @@ Using Jev's `task_complexity` score, [`utils/llm_pick.py`](file:///home/meet-wad
 In legacy implementations, every question is passed to an LLM node (`curate_ques`) to rephrase it.
 With Jev, if `needs_curation.noul < 0.50`, the LangGraph router activates `skip_curation`, routing directly to schema injection:
 
-$$\text{User Query} \xrightarrow[\text{needs\_curation} < 0.5]{\text{Jev}} \text{skip\_curation} \longrightarrow \text{prompt\_query\_context} \quad (\mathbf{0\ LLM\ tokens\ spent})$$
+```text
+User Query ──► [ Jev: needs_curation < 0.50 ] ──► skip_curation ──► prompt_query_context (⚡ 0 LLM Tokens)
+```
 
 ### SQL Security Guardrail & Cascade Escalation
 
