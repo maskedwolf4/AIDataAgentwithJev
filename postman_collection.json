@@ -1,0 +1,249 @@
+{
+  "info": {
+    "name": "AI Data Agent — Jev + Groq",
+    "description": "Complete Postman collection for testing the AI Data Agent backend with TypeSafe Jev routing and Groq LLMs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Verify API health, key presence, DB status, and Groq model mapping."
+      }
+    },
+    {
+      "name": "Agent Query — Simple SQL",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"What are the different payment methods in our database?\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/agent/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "agent", "query"]
+        },
+        "description": "Simple SQL query routed through the full Jev-governed agent pipeline."
+      }
+    },
+    {
+      "name": "Agent Query — Complex Multi-Table SQL",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Show me the top 5 drivers by average rating who have completed more than 10 rides, including their total earnings and number of completed rides.\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/agent/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "agent", "query"]
+        },
+        "description": "Complex multi-table SQL query — should route to a higher Groq tier."
+      }
+    },
+    {
+      "name": "Agent Query — ETL Extract",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Extract data from the API endpoint 'https://pokeapi.co/api/v2/pokemon' and save it to the data/extract folder in csv format.\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/agent/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "agent", "query"]
+        },
+        "description": "ETL extract operation — should be routed to etl_node by Jev."
+      }
+    },
+    {
+      "name": "Agent Query — Ambiguous (Confidence Gate Test)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Tell me a joke about databases.\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/agent/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "agent", "query"]
+        },
+        "description": "Ambiguous/unsupported request — should trigger clarify_node."
+      }
+    },
+    {
+      "name": "Jev Triage — Standalone",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"What are the top 10 cities with the most riders?\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/jev/triage",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "jev", "triage"]
+        },
+        "description": "Test Jev's raw routing decision (0 Groq tokens). Inspect Choice/Score/Noul probabilities."
+      }
+    },
+    {
+      "name": "SQL Query — Direct",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"How many active drivers do we have in each city?\",\n  \"model_tier\": null\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/sql/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "sql", "query"]
+        },
+        "description": "Direct SQL analyst endpoint with auto Jev model tier selection."
+      }
+    },
+    {
+      "name": "SQL Query — Manual Tier Override",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"What is the average fare per ride status?\",\n  \"model_tier\": \"high\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/sql/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "sql", "query"]
+        },
+        "description": "Direct SQL with manual tier override to llama-3.3-70b-versatile."
+      }
+    },
+    {
+      "name": "ETL Run — Direct",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Extract data from 'https://pokeapi.co/api/v2/pokemon' and save it to data/extract folder in csv format.\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/etl/run",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "etl", "run"]
+        },
+        "description": "Direct ETL analyst endpoint."
+      }
+    },
+    {
+      "name": "Jev Verify SQL — Safe Query",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"How many users are there?\",\n  \"sql_query\": \"SELECT COUNT(*) FROM users;\",\n  \"current_tier\": \"low\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/jev/verify-sql",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "jev", "verify-sql"]
+        },
+        "description": "Test Jev SQL guardrail with a safe SELECT query."
+      }
+    },
+    {
+      "name": "Jev Verify SQL — Unsafe DROP TABLE",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question\": \"Delete all users\",\n  \"sql_query\": \"DROP TABLE users;\",\n  \"current_tier\": \"medium\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/jev/verify-sql",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "jev", "verify-sql"]
+        },
+        "description": "Test Jev SQL guardrail with a destructive DROP TABLE — should be blocked."
+      }
+    }
+  ]
+}
